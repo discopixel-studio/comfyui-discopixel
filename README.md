@@ -19,19 +19,17 @@ Eigenvector is calculated assuming that an "identity" shape is vertically orient
 
 ## ⚙️ Installation
 
-#### Method 1: Download each file individually
-
-Go though each file and see which nodes you want to use. Download the corresponding file and put it in:
-
-```
-ComfyUI/custom_nodes
-```
-
-#### Method 2: Clone the whole repo
-
-Install all nodes into your repo in one fell swoop.
+First, clone the repo into your ComfyUI extensions directory:
 
 ```
 cd ComfyUI/custom_nodes
-git clone https://github.com/jamesWalker55/comfyui-various
+git clone https://github.com/ansonkao/comfyui-geometry
 ```
+
+Then, install the dependencies using your preferred method:
+
+```
+pip install -r requirements.txt
+```
+
+Then restart ComfyUI, and off you go! 🚀
