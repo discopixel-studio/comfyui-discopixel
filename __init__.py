@@ -7,14 +7,13 @@
 
 import importlib
 
-print(f"### Loading: ComfyUI Geometry")
+print(f"Loading ComfyUI Geometry!")
 
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}
 
 NODE_MODULES = [
-    ".comfyui_mask_centroid",
-    ".comfyui_mask_eigenvector",
+    ".comfyui_geometry_nodes",
 ]
 
 def load_nodes(module_name: str):

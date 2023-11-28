@@ -29,7 +29,7 @@ git clone https://github.com/ansonkao/comfyui-geometry
 Then, install the dependencies using your preferred method:
 
 ```
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 Then restart ComfyUI, and off you go! 🚀
