@@ -14,8 +14,8 @@ def register_node(identifier: str, display_name: str):
 
     return decorator
 
-@register_node("TransformImageToMatchMask", "Transform Image to Match Mask")
-class TransformImageToMatchMask:
+@register_node("TransformTemplateOntoFaceMask", "Transform Template onto Face Mask")
+class TransformTemplateOntoFaceMask:
     """
     Takes a mask as input, and calculates the centroid.
     Useful to find the center of a shape in the mask.
@@ -28,14 +28,15 @@ class TransformImageToMatchMask:
     def INPUT_TYPES(s):
         return {
             "required": {
-                "mask": ("MASK",),
-                "image": ("IMAGE",),
+                "face_mask": ("MASK",),
+                "template_image": ("IMAGE",),
+                "template_mask": ("MASK",),
             },
         }
 
-    RETURN_TYPES = ("IMAGE",)
+    RETURN_TYPES = ("IMAGE", "MASK")
     CATEGORY = "Geometry"
-    FUNCTION = "transform_image"
+    FUNCTION = "transform_template"
 
     def convert_image_from_tensor_to_numpy(self, image_tensor):
         # Convert from PyTorch tensor to NumPy array
@@ -48,6 +49,15 @@ class TransformImageToMatchMask:
         image_np = image_np[:, :, [2, 1, 0]]
 
         return image_np
+
+    def convert_mask_from_tensor_to_numpy(self, mask_tensor):
+        # Convert from PyTorch tensor to NumPy array
+        mask_np = mask_tensor.squeeze().numpy()
+
+        # Convert from normalized floats back to uint8
+        mask_np = (mask_np * 255).astype(np.uint8)
+
+        return mask_np
 
     def convert_image_from_numpy_to_tensor(self, image_np):
         # Convert from BGR to RGB
@@ -64,10 +74,22 @@ class TransformImageToMatchMask:
 
         return image_tensor
 
-    def calculate_transformation(self, mask, image):
+    def convert_mask_from_numpy_to_tensor(self, mask_np):
+        # Normalize the pixel values to [0.0, 1.0]
+        mask_normalized = mask_np.astype(np.float32) / 255.0
+
+        # Convert to a PyTorch tensor
+        mask_tensor = torch.from_numpy(mask_normalized)
+
+        # Add a batch dimension with [None,] or .unsqueeze(0)
+        mask_tensor = mask_tensor[None,]
+
+        return mask_tensor
+
+    def calculate_transformation(self, face_mask, template_mask):
         # Convert the tensor to a numpy array and remove the batch and color dimensions
         # The resulting array will have shape [height, width]
-        np_image = mask.squeeze().numpy()
+        np_image = self.convert_mask_from_tensor_to_numpy(face_mask)
 
         # Assuming the object is white and the background is black
         # Create a binary image (you might need to adjust the thresholding logic based on your image)
@@ -108,8 +130,8 @@ class TransformImageToMatchMask:
         ellipse_width = int(minor_axis_length / 2)
 
         # Starting and ending dimensions
-        height_out, width_out = mask.shape[1:3]
-        height_in, width_in = image.shape[1:3]
+        height_out, width_out = face_mask.shape[1:3]
+        height_in, width_in = template_mask.shape[1:3]
 
         # Calculate the scale relative to the original template size
         scale_x = ellipse_width / 72
@@ -172,22 +194,31 @@ class TransformImageToMatchMask:
             matrix,
         )
 
-    def transform_image(self, mask, image):
-        centroid_x, centroid_y, ellipse_length, ellipse_width, rotation, matrix = self.calculate_transformation(mask, image)
+    def transform_template(self, face_mask, template_image, template_mask):
+        centroid_x, centroid_y, ellipse_length, ellipse_width, rotation, matrix = self.calculate_transformation(face_mask, template_mask)
 
         # Create a blank canvas the same size as the mask
-        height_in, width_in = image.shape[1:3]
-        height_out, width_out = mask.shape[1:3]
-        canvas = np.zeros((height_out, width_out, 3), np.uint8)
+        height_in, width_in = template_image.shape[1:3]
+        height_out, width_out = face_mask.shape[1:3]
+        image_canvas = np.zeros((height_out, width_out, 3), np.uint8)
+        mask_canvas = np.zeros((height_out, width_out), np.uint8)
 
         # Drop the image into the center of this canvas
         x_offset = (width_out - width_in) // 2
         y_offset = (height_out - height_in) // 2
-        image_np = self.convert_image_from_tensor_to_numpy(image)
-        canvas[y_offset:y_offset + height_in, x_offset:x_offset + width_in] = image_np
+        template_image_np = self.convert_image_from_tensor_to_numpy(template_image)
+        template_mask_np = self.convert_mask_from_tensor_to_numpy(template_mask)
+
+        # Invert the mask before transforming so unmasked space around the canvas is maintained automatically
+        template_mask_np = 255.0 - template_mask_np
+
+        # Drop the input template image and mask into the center of the output canvases
+        image_canvas[y_offset:y_offset + height_in, x_offset:x_offset + width_in] = template_image_np
+        mask_canvas[y_offset:y_offset + height_in, x_offset:x_offset + width_in] = template_mask_np
 
         # Apply the affine transformation
-        transformed_image = cv2.warpAffine(canvas, matrix[:2], (width_out, height_out))
+        transformed_template_image = cv2.warpAffine(image_canvas, matrix[:2], (width_out, height_out))
+        transformed_template_mask = cv2.warpAffine(mask_canvas, matrix[:2], (width_out, height_out))
 
         # Draw the ellipse to preview the calculation
         debug_calculation = False
@@ -195,9 +226,14 @@ class TransformImageToMatchMask:
             centroid = (centroid_x, centroid_y)
             axes = (ellipse_length, ellipse_width)
             angle = rotation * (180 / np.pi)
-            cv2.ellipse(transformed_image, centroid, axes, angle, 0, 350, (0, 255, 0), 2)        
-            cv2.circle(transformed_image, (centroid_x, centroid_y), radius=5, color=(255, 0, 0), thickness=-5)
+            cv2.ellipse(transformed_template_image, centroid, axes, angle, 0, 350, (0, 255, 0), 2)        
+            cv2.circle(transformed_template_image, (centroid_x, centroid_y), radius=5, color=(255, 0, 0), thickness=-5)
+
+        # Invert the mask back to normal
+        transformed_template_mask = 255.0 - transformed_template_mask
 
         # Convert the image back to a tensor
-        final_image = self.convert_image_from_numpy_to_tensor(transformed_image)
-        return (final_image,)
+        final_image = self.convert_image_from_numpy_to_tensor(transformed_template_image)
+        final_mask = self.convert_mask_from_numpy_to_tensor(transformed_template_mask)
+
+        return (final_image, final_mask)
