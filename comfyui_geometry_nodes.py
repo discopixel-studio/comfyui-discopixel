@@ -76,33 +76,27 @@ class TransformImageToMatchMask:
         # Find the indices of non-zero (white) pixels
         y_indices, x_indices = np.nonzero(binary_image)
 
-        # Calculate the weighted average of the positions
-        total_weight = len(x_indices)
-        centroid_x = np.sum(x_indices) // total_weight
-        centroid_y = np.sum(y_indices) // total_weight
+        # Calculate the mean of the points
+        x_mean, y_mean = np.mean(x_indices), np.mean(y_indices)
 
-        # Center the coordinates around the centroid
-        x_indices_centered = x_indices - centroid_x
-        y_indices_centered = y_indices - centroid_y
+        # Calculate the covariance matrix
+        cov_matrix = np.cov(x_indices, y_indices)
 
-        # Compute the covariance matrix
-        cov_matrix = np.cov(x_indices_centered, y_indices_centered)
+        # Eigenvalues and eigenvectors
+        eigenvalues, eigenvectors = np.linalg.eigh(cov_matrix)
 
-        # Compute eigenvectors and eigenvalues
-        eigenvalues, eigenvectors = np.linalg.eig(cov_matrix)
-        print(f"Eigenvalues: {eigenvalues}")
-        print(f"Eigenvectors: \n{eigenvectors}")
+        # The largest eigenvalue corresponds to the major axis
+        major_axis_length = 2 * np.sqrt(eigenvalues[1]) * 2  # Scale as needed
+        minor_axis_length = 2 * np.sqrt(eigenvalues[0]) * 2  # Scale as needed
 
-        # Eigenvector with the largest eigenvalue is the major axis
-        major_axis_index = np.argmax(eigenvalues)
-        major_axis_vector = eigenvectors[:, major_axis_index]
+        # Angle between x-axis and the major axis of the ellipse in degrees
+        angle = np.arctan2(eigenvectors[1, 1], eigenvectors[0, 1]) * (180 / np.pi)
 
-        # Calculate rotation angle (in radians)
-        rotation = np.arctan2(major_axis_vector[1], major_axis_vector[0])
+        # Draw the ellipse
+        center = (int(x_mean), int(y_mean))
+        axes = (int(major_axis_length / 2), int(minor_axis_length / 2))
 
-        # # Scale factors (sqrt of eigenvalues)
-        # scale_x = np.sqrt(eigenvalues[major_axis_index]) * 2  # Multiply by 2 as it's a radius
-        # scale_y = np.sqrt(eigenvalues[1 - major_axis_index]) * 2
+        return (center, axes, angle)
 
         # # Adjust scale for the identity oval dimensions (using golden ratio)
         # scale_x = scale_x / 1.618033988749895
@@ -198,7 +192,7 @@ class TransformImageToMatchMask:
         # return transformation_matrix
 
     def transform_image(self, mask, image):
-        transformation_matrix = self.calculate_transformation_matrix(mask, image)
+        center, axes, angle = self.calculate_transformation_matrix(mask, image)
 
         # Create a blank canvas the same size as the mask
         height_in, width_in = image.shape[1:3]
@@ -208,21 +202,25 @@ class TransformImageToMatchMask:
         canvas = np.zeros((height_out, width_out, 3), np.uint8)
         print(f"canvas.shape(): {canvas.shape} image.shape(): {image.shape}")
 
-        # Drop the image into the center of this canvas
-        x_offset = (width_out - width_in) // 2
-        y_offset = (height_out - height_in) // 2
-        image_np = self.convert_image_from_tensor_to_numpy(image)
-        canvas[y_offset:y_offset + height_in, x_offset:x_offset + width_in] = image_np
+        # # Drop the image into the center of this canvas
+        # x_offset = (width_out - width_in) // 2
+        # y_offset = (height_out - height_in) // 2
+        # image_np = self.convert_image_from_tensor_to_numpy(image)
+        # canvas[y_offset:y_offset + height_in, x_offset:x_offset + width_in] = image_np
 
 
-        print(f"Transform Matrix = \n{transformation_matrix}")
+        # print(f"Transform Matrix = \n{transformation_matrix}")
 
 
 
         # Apply the affine transformation
-        transformed_image = cv2.warpAffine(canvas, transformation_matrix[:2], (width_out, height_out))
+        # transformed_image = cv2.warpAffine(canvas, transformation_matrix[:2], (width_out, height_out))
+
+        cv2.ellipse(canvas, center, axes, angle, 0, 360, (0, 255, 0), 2)        
+
 
         # print(f"Centroid = {(centroid_x, centroid_y)}")
         # cv2.circle(preview_image, (centroid_x, centroid_y), radius=5, color=(0, 0, 255), thickness=-5)
-        transformed_image = self.convert_image_from_numpy_to_tensor(transformed_image)
+        # transformed_image = self.convert_image_from_numpy_to_tensor(transformed_image)
+        transformed_image = self.convert_image_from_numpy_to_tensor(canvas)
         return (transformed_image,)
