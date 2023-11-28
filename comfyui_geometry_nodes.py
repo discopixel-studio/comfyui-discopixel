@@ -79,6 +79,12 @@ class TransformImageToMatchMask:
         # Calculate the centroid
         centroid_x, centroid_y = int(np.mean(x_indices)), int(np.mean(y_indices))
 
+        # Re-orient the image so that the "top" is facing right, because linear algebra treats positive X-axis as 0 degrees, and we want rotation to be relative to the "top"
+        oriented_image = np.rot90(binary_image, k=3)
+
+        # Find the indices of non-zero (white) pixels
+        y_indices, x_indices = np.nonzero(oriented_image)
+
         # Calculate the covariance matrix
         cov_matrix = np.cov(x_indices, y_indices)
 
@@ -91,6 +97,11 @@ class TransformImageToMatchMask:
 
         # Angle between x-axis and the major axis of the ellipse in degrees
         rotation = np.arctan2(eigenvectors[1, 1], eigenvectors[0, 1])
+        rotation += np.pi / 2 # Reverse the orientation compensation
+
+        # Adjust the rotation to be between -90 and 90 degrees from the vertical (can't figure out why we need this)
+        if (rotation > np.pi * 0.75 and rotation < np.pi):
+            rotation -= np.pi
 
         # Draw the ellipse
         ellipse_length = int(major_axis_length / 2)
@@ -129,7 +140,7 @@ class TransformImageToMatchMask:
         ])
 
         # Rotation matrix
-        adjusted_rotation = rotation - np.pi / 2 # For whatever reason, the original is off by 90deg
+        adjusted_rotation = rotation + np.pi / 2 # For whatever reason, the original is off by 90deg
         rotation_matrix = np.array([
             [np.cos(adjusted_rotation), -np.sin(adjusted_rotation), 0],
             [np.sin(adjusted_rotation), np.cos(adjusted_rotation), 0],
@@ -146,9 +157,10 @@ class TransformImageToMatchMask:
         # Combine the matrices
         matrix = np.dot(final_translation_matrix, np.dot(rotation_matrix, np.dot(scaling_matrix, initial_translation_matrix)))
 
+        print("\n=== Transformation ===")
         print(f"Centroid: {(centroid_x, centroid_y)}")
         print(f"Ellipse: {(ellipse_length, ellipse_width)}")
-        print(f"Rotation: {rotation}")
+        print(f"Rotation: {rotation * (180 / np.pi)}")
         print(f"Matrix: \n{matrix}")
 
         return (
@@ -166,10 +178,7 @@ class TransformImageToMatchMask:
         # Create a blank canvas the same size as the mask
         height_in, width_in = image.shape[1:3]
         height_out, width_out = mask.shape[1:3]
-        print(f"image.shape(): {(image.shape)} mask.shape(): {(mask.shape)}")
-        print(f"image.shape(): {(height_in, width_in)} mask.shape(): {(height_out, width_out)}")
         canvas = np.zeros((height_out, width_out, 3), np.uint8)
-        print(f"canvas.shape(): {canvas.shape} image.shape(): {image.shape}")
 
         # Drop the image into the center of this canvas
         x_offset = (width_out - width_in) // 2
@@ -177,22 +186,18 @@ class TransformImageToMatchMask:
         image_np = self.convert_image_from_tensor_to_numpy(image)
         canvas[y_offset:y_offset + height_in, x_offset:x_offset + width_in] = image_np
 
-
-        print(f"Matrix = \n{matrix}")
-
-
-
         # Apply the affine transformation
         transformed_image = cv2.warpAffine(canvas, matrix[:2], (width_out, height_out))
 
-        centroid = (centroid_x, centroid_y)
-        axes = (ellipse_length, ellipse_width)
-        angle = rotation * (180 / np.pi)
-        cv2.ellipse(transformed_image, centroid, axes, angle, 0, 360, (0, 255, 0), 2)        
+        # Draw the ellipse to preview the calculation
+        debug_calculation = False
+        if (debug_calculation):
+            centroid = (centroid_x, centroid_y)
+            axes = (ellipse_length, ellipse_width)
+            angle = rotation * (180 / np.pi)
+            cv2.ellipse(transformed_image, centroid, axes, angle, 0, 350, (0, 255, 0), 2)        
+            cv2.circle(transformed_image, (centroid_x, centroid_y), radius=5, color=(255, 0, 0), thickness=-5)
 
-
-        # print(f"Centroid = {(centroid_x, centroid_y)}")
-        # cv2.circle(preview_image, (centroid_x, centroid_y), radius=5, color=(0, 0, 255), thickness=-5)
-        # transformed_image = self.convert_image_from_numpy_to_tensor(transformed_image)
+        # Convert the image back to a tensor
         final_image = self.convert_image_from_numpy_to_tensor(transformed_image)
         return (final_image,)
