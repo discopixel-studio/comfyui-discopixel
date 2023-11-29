@@ -11,6 +11,8 @@ It does this via calculating the centroid and eigenvectors of the Face.
 Useful for placing things onto a face.
 This assumes there is only one shape in the face mask, and such that the shape is comprised of white pixels over a black background.
 
+![Sample Workflow](example_workflow.png)
+
 ## ⚙️ Installation
 
 First, clone the repo into your ComfyUI extensions directory:
