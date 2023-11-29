@@ -35,7 +35,7 @@ class TransformTemplateOntoFaceMask:
         }
 
     RETURN_TYPES = ("IMAGE", "MASK")
-    CATEGORY = "Geometry"
+    CATEGORY = "Discopixel"
     FUNCTION = "transform_template"
 
     def convert_image_from_tensor_to_numpy(self, image_tensor):
