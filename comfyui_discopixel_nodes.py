@@ -195,6 +195,15 @@ class TransformTemplateOntoFaceMask:
         )
 
     def transform_template(self, face_mask, template_image, template_mask):
+        # Ensure batch dimension for consistent handling
+        if face_mask.dim() == 2:
+            face_mask = face_mask.unsqueeze(0)
+        if template_image.dim() == 3:
+            template_image = template_image.unsqueeze(0)
+        if template_mask.dim() == 2:
+            template_mask = template_mask.unsqueeze(0)
+
+        # Calculate the transformation
         centroid_x, centroid_y, ellipse_length, ellipse_width, rotation, matrix = self.calculate_transformation(face_mask, template_mask)
 
         # Create a blank canvas the same size as the mask

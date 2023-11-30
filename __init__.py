@@ -1,19 +1,19 @@
 """
 @author: Anson Kao
-@title: ComfyUI Geometry
-@nickname: ComfyUI Geometry
-@description: A small collection of custom nodes for use with ComfyUI, for geometry calculations
+@title: ComfyUI Discopixel
+@nickname: ComfyUI Discopixel
+@description: A small collection of custom nodes for use with ComfyUI, by Discopixel
 """
 
 import importlib
 
-print(f"Loading ComfyUI Geometry!")
+print(f"Loading ComfyUI Discopixel nodes!")
 
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}
 
 NODE_MODULES = [
-    ".comfyui_geometry_nodes",
+    ".comfyui_discopixel_nodes",
 ]
 
 def load_nodes(module_name: str):
