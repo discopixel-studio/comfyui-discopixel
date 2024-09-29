@@ -1,0 +1,15 @@
+[project]
+name = "comfyui-discopixel"
+description = "A small collection of custom nodes for use with ComfyUI, by Discopixel"
+version = "0.1.0"
+license = "LICENSE"
+dependencies = ["opencv-python"]
+
+[project.urls]
+Repository = "https://github.com/discopixel-studio/comfyui-discopixel"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = "discopixel"
+DisplayName = "PhotoRoom Nodes by Discopixel"
+Icon = "https://discopixel.nyc3.cdn.digitaloceanspaces.com/marketing/discopixel-studio-logo.png"
