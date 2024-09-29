@@ -13,6 +13,12 @@ Sometimes you just need a higher quality and more automatic background removal t
 
 ## ⚙️ Installation
 
+#### 1. Using Comfy Registry
+
+Find us in the ComfyUI registry: https://registry.comfy.org/publishers/discopixel
+
+#### 2. Manual
+
 First, clone the repo into your ComfyUI extensions directory:
 
 ```
