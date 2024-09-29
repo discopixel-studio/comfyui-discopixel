@@ -4,12 +4,14 @@ A small collection of custom nodes for use with [ComfyUI](https://github.com/com
 
 ## 🔌 Available Nodes
 
-#### 1. Remove Background using Photoroom API
+#### 1. Transform Template onto Face Mask
 
-Sometimes you just need a higher quality and more automatic background removal than what's available opensource.
+Takes a template and a face mask as inputs, and transforms the template to fit over the face.
+It does this via calculating the centroid and eigenvectors of the Face.
+Useful for placing things onto a face.
+This assumes there is only one shape in the face mask, and such that the shape is comprised of white pixels over a black background.
 
-![Screenshot of Example Workflow](example_workflow.png)
-[Example Workflow](example_workflow.json)
+![Sample Workflow](example_workflow_ARCHIVE.png)
 
 ## ⚙️ Installation
 

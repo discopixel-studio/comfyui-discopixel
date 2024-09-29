@@ -1,0 +1,311 @@
+{
+  "last_node_id": 22,
+  "last_link_id": 32,
+  "nodes": [
+    {
+      "id": 21,
+      "type": "GetImageSize+",
+      "pos": [500, 999],
+      "size": {
+        "0": 210,
+        "1": 46
+      },
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 24
+        }
+      ],
+      "outputs": [
+        {
+          "name": "width",
+          "type": "INT",
+          "links": [25],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": [26],
+          "shape": 3,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "GetImageSize+"
+      }
+    },
+    {
+      "id": 18,
+      "type": "ImageCompositeFromMaskBatch+",
+      "pos": [1037, 446],
+      "size": [313.0407264404291, 82.03212236785862],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image_from",
+          "type": "IMAGE",
+          "link": 32
+        },
+        {
+          "name": "image_to",
+          "type": "IMAGE",
+          "link": 31
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 29
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [30],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageCompositeFromMaskBatch+"
+      }
+    },
+    {
+      "id": 13,
+      "type": "PhotoroomRemoveBG",
+      "pos": [405, 465],
+      "size": {
+        "0": 315,
+        "1": 78
+      },
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 14
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [17, 31],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [21, 29],
+          "shape": 3,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PhotoroomRemoveBG"
+      },
+      "widgets_values": ["INSERT YOUR PHOTOROOM API KEY HERE"]
+    },
+    {
+      "id": 8,
+      "type": "LoadImage",
+      "pos": [100, 460],
+      "size": [260, 460],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [14, 24],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": ["input_image.png", "image"]
+    },
+    {
+      "id": 22,
+      "type": "PreviewImage",
+      "pos": [1384, 447],
+      "size": [250, 390],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 30
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      }
+    },
+    {
+      "id": 20,
+      "type": "PreviewImage",
+      "pos": [1161, 871],
+      "size": [160, 260],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 23
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      }
+    },
+    {
+      "id": 16,
+      "type": "PreviewImage",
+      "pos": [757, 631],
+      "size": [150, 250],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 19
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      }
+    },
+    {
+      "id": 15,
+      "type": "MaskToImage",
+      "pos": [755, 554],
+      "size": [180, 30],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 21
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [19],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MaskToImage"
+      }
+    },
+    {
+      "id": 14,
+      "type": "PreviewImage",
+      "pos": [760, 210],
+      "size": [140, 240],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 17
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      }
+    },
+    {
+      "id": 19,
+      "type": "EmptyImage",
+      "pos": [809, 999],
+      "size": [315, 130],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "width",
+          "type": "INT",
+          "link": 25,
+          "widget": {
+            "name": "width"
+          }
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "link": 26,
+          "widget": {
+            "name": "height"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [23, 32],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptyImage"
+      },
+      "widgets_values": [512, 512, 1, 5025616]
+    }
+  ],
+  "links": [
+    [14, 8, 0, 13, 0, "IMAGE"],
+    [17, 13, 0, 14, 0, "IMAGE"],
+    [19, 15, 0, 16, 0, "IMAGE"],
+    [21, 13, 1, 15, 0, "MASK"],
+    [23, 19, 0, 20, 0, "IMAGE"],
+    [24, 8, 0, 21, 0, "IMAGE"],
+    [25, 21, 0, 19, 0, "INT"],
+    [26, 21, 1, 19, 1, "INT"],
+    [29, 13, 1, 18, 2, "MASK"],
+    [30, 18, 0, 22, 0, "IMAGE"],
+    [31, 13, 0, 18, 1, "IMAGE"],
+    [32, 19, 0, 18, 0, "IMAGE"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}
