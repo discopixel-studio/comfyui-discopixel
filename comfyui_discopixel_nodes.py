@@ -585,21 +585,14 @@ class PhotoroomRemoveBG:
             )
             post_response.raise_for_status()
 
-            # Save the output to a file
-            output_path = f"/tmp/photoroom-result-{int(time.time())}.png"
-            with open(output_path, "wb") as out_file:
-                out_file.write(post_response.content)
-
             # Convert the resulting image into the same image format that was originally inputted to run()
             image_buffer = BytesIO(post_response.content)
             return image_buffer
         except Exception as e:
-            print(f"API Call Error: {e}")
+            print(f"Photoroom Error: {e}")
             return None
 
     def run(self, images, api_key):
-        print(f"images: {images}")
-
         if images.dim() == 3:
             images = images.unsqueeze(0)
 
@@ -616,11 +609,8 @@ class PhotoroomRemoveBG:
             # Remove the background
             output_buffer = self.remove_background(image_buffer, api_key)
 
-            print("0000")
             # Load the result image
             final_image = Image.open(output_buffer)
-
-            print("AAAA")
 
             for i in ImageSequence.Iterator(final_image):
                 i = ImageOps.exif_transpose(i)

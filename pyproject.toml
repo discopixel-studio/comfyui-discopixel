@@ -1,6 +1,6 @@
 [project]
 name = "comfyui-discopixel"
-description = "A small collection of custom nodes for use with ComfyUI, by Discopixel"
+description = "A small collection of custom nodes for use with ComfyUI, by [Discopixel](https://discopixel.studio)"
 version = "0.2.0"
 license = "LICENSE"
 dependencies = ["opencv-python"]
